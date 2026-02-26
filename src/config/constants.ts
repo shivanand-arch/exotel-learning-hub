@@ -20,9 +20,9 @@ export const DB_NAME = 'exotel-hub-db';
 export const DB_VERSION = 1;
 
 // ─── Gemini Model Config ──────────────────────────────────────────────────────
-export const GEMINI_CHAT_MODEL = 'gemini-3-flash-preview';
-export const GEMINI_LIVE_MODEL = 'gemini-3-flash-preview';
-export const GEMINI_TTS_MODEL = 'gemini-3-flash-preview';  // fallback TTS
+export const GEMINI_CHAT_MODEL = 'gemini-2.0-flash';
+export const GEMINI_LIVE_MODEL = 'gemini-2.0-flash-live-001';
+export const GEMINI_TTS_MODEL = 'gemini-2.0-flash';  // TTS via AUDIO modality
 
 export const TEAM_COLORS = [
   { name: 'red', bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', badge: 'bg-red-100 text-red-700', accent: '#E53935' },
