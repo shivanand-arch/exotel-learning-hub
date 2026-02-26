@@ -23,6 +23,7 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
+// ── Full Google OAuth provider (used when VITE_GOOGLE_CLIENT_ID is set) ──────
 function AuthProviderInner({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,10 +32,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem('exotel-hub-user');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setUser(parsed);
-      }
+      if (stored) setUser(JSON.parse(stored));
     } catch { /* ignore */ }
     setIsLoading(false);
   }, []);
@@ -56,13 +54,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const userData: User = {
-        id: info.sub,
-        email,
-        name: info.name,
-        picture: info.picture,
-        domain,
-      };
+      const userData: User = { id: info.sub, email, name: info.name, picture: info.picture, domain };
       localStorage.setItem('exotel-hub-user', JSON.stringify(userData));
       setUser(userData);
     } catch (e) {
@@ -79,15 +71,37 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
     hosted_domain: ALLOWED_DOMAIN,
   });
 
-  const login = useCallback(() => {
-    setError(null);
-    googleLogin();
-  }, [googleLogin]);
+  const login = useCallback(() => { setError(null); googleLogin(); }, [googleLogin]);
+  const logout = useCallback(() => { localStorage.removeItem('exotel-hub-user'); setUser(null); }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('exotel-hub-user');
-    setUser(null);
+  return (
+    <AuthContext.Provider value={{ user, isLoading, error, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// ── Dev / no-OAuth fallback (used when VITE_GOOGLE_CLIENT_ID is not set) ─────
+function AuthProviderDev({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('exotel-hub-user');
+      if (stored) setUser(JSON.parse(stored));
+    } catch { /* ignore */ }
+    setIsLoading(false);
   }, []);
+
+  const login = useCallback(() => {
+    const devUser: User = { id: 'dev', email: 'dev@exotel.com', name: 'Dev User', picture: '', domain: 'exotel.com' };
+    localStorage.setItem('exotel-hub-user', JSON.stringify(devUser));
+    setUser(devUser);
+  }, []);
+
+  const logout = useCallback(() => { localStorage.removeItem('exotel-hub-user'); setUser(null); }, []);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, error, login, logout }}>
@@ -97,6 +111,9 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  if (!GOOGLE_CLIENT_ID) {
+    return <AuthProviderDev>{children}</AuthProviderDev>;
+  }
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <AuthProviderInner>{children}</AuthProviderInner>
