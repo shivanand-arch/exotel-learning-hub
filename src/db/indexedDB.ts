@@ -30,7 +30,7 @@ export async function getDB(): Promise<IDBPDatabase<ExotelHubDB>> {
   if (dbInstance) return dbInstance;
 
   dbInstance = await openDB<ExotelHubDB>(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion) {
+    upgrade(db, oldVersion, _newVersion, transaction) {
       // Teams store
       if (!db.objectStoreNames.contains('teams')) {
         const teamsStore = db.createObjectStore('teams', { keyPath: 'id' });
@@ -54,12 +54,15 @@ export async function getDB(): Promise<IDBPDatabase<ExotelHubDB>> {
         db.createObjectStore('settings', { keyPath: 'key' });
       }
 
-      // Seed data on first install
+      // Seed data on first install — use the implicit upgrade transaction, NOT db.transaction()
+      // Creating a new transaction inside upgrade() violates the IDB spec and silently fails.
       if (oldVersion === 0) {
-        const tx = db.transaction(['teams', 'modules', 'settings'], 'readwrite');
-        DEFAULT_TEAMS.forEach(t => tx.objectStore('teams').add(t));
-        DEFAULT_MODULES.forEach(m => tx.objectStore('modules').add(m));
-        tx.objectStore('settings').add({ key: 'initialized', value: true });
+        const teamsStore = transaction.objectStore('teams');
+        const modulesStore = transaction.objectStore('modules');
+        const settingsStore = transaction.objectStore('settings');
+        DEFAULT_TEAMS.forEach(t => teamsStore.add(t));
+        DEFAULT_MODULES.forEach(m => modulesStore.add(m));
+        settingsStore.add({ key: 'initialized', value: true });
       }
     },
   });

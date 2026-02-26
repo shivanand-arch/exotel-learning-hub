@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Team, ContentModule } from '../types';
 import { getAllTeams, getAllModules, saveTeam, saveModule, deleteTeam, deleteModule } from '../db/indexedDB';
+import { DEFAULT_TEAMS, DEFAULT_MODULES } from '../config/constants';
 
 interface AppContextValue {
   teams: Team[];
@@ -36,7 +37,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshData = useCallback(async () => {
     try {
-      const [t, m] = await Promise.all([getAllTeams(), getAllModules()]);
+      let [t, m] = await Promise.all([getAllTeams(), getAllModules()]);
+
+      // If DB came back empty (seeding failed on first install due to IDB upgrade bug),
+      // seed the defaults now so teams always appear in the Content Manager dropdown.
+      if (t.length === 0) {
+        await Promise.all([
+          ...DEFAULT_TEAMS.map(team => saveTeam(team)),
+          ...DEFAULT_MODULES.map(mod => saveModule(mod)),
+        ]);
+        t = DEFAULT_TEAMS;
+        m = DEFAULT_MODULES;
+      }
+
       setTeams(t);
       setModules(m);
     } catch (e) {
