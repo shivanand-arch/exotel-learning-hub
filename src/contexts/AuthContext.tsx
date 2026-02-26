@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import type { User } from '../types';
-import { ALLOWED_DOMAIN, GOOGLE_CLIENT_ID } from '../config/constants';
+import { ALLOWED_DOMAIN, GOOGLE_CLIENT_ID, isAdminEmail } from '../config/constants';
 
 interface AuthContextValue {
   user: User | null;
+  isAdmin: boolean;
   isLoading: boolean;
   error: string | null;
   login: () => void;
@@ -13,6 +14,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
+  isAdmin: false,
   isLoading: true,
   error: null,
   login: () => {},
@@ -74,8 +76,10 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
   const login = useCallback(() => { setError(null); googleLogin(); }, [googleLogin]);
   const logout = useCallback(() => { localStorage.removeItem('exotel-hub-user'); setUser(null); }, []);
 
+  const isAdmin = user ? isAdminEmail(user.email) : false;
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, error, login, logout }}>
+    <AuthContext.Provider value={{ user, isAdmin, isLoading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -103,8 +107,9 @@ function AuthProviderDev({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => { localStorage.removeItem('exotel-hub-user'); setUser(null); }, []);
 
+  // In dev mode (no Google OAuth), always grant admin access for testing
   return (
-    <AuthContext.Provider value={{ user, isLoading, error, login, logout }}>
+    <AuthContext.Provider value={{ user, isAdmin: true, isLoading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

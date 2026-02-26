@@ -25,6 +25,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Redirects non-admin users back to dashboard if they try to access admin-only routes
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAdmin, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   const { user } = useAuth();
   return (
@@ -40,7 +48,7 @@ function AppRoutes() {
         }>
           <Route index element={<Dashboard />} />
           <Route path="team/:teamId" element={<TeamDetail />} />
-          <Route path="content" element={<ContentManager />} />
+          <Route path="content" element={<AdminRoute><ContentManager /></AdminRoute>} />
           <Route path="chat" element={<AIChat />} />
           <Route path="voice" element={<VoiceMode />} />
         </Route>

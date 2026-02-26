@@ -43,6 +43,7 @@ jobs:
           # Add these in GitHub → Settings → Secrets → Actions → New secret
           VITE_GEMINI_API_KEY:   ${{ secrets.VITE_GEMINI_API_KEY }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_ADMIN_EMAILS:     ${{ secrets.VITE_ADMIN_EMAILS }}
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4

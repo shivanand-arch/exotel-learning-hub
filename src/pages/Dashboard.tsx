@@ -101,7 +101,7 @@ function StatsBar() {
 export function Dashboard() {
   const navigate = useNavigate();
   const { teams, modules, isLoading, searchQuery } = useApp();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const filteredTeams = searchQuery
     ? teams.filter(t =>
@@ -152,18 +152,27 @@ export function Dashboard() {
             Your unified learning hub. Explore training from all Exotel teams — videos, decks, docs, and AI-powered coaching.
           </p>
           <div className="flex gap-3">
-            <button
-              onClick={() => navigate('/content')}
-              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-red-900/30 active:scale-95"
-            >
-              <Upload size={15} />
-              Upload Content
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => navigate('/content')}
+                className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-red-900/30 active:scale-95"
+              >
+                <Upload size={15} />
+                Upload Content
+              </button>
+            )}
             <button
               onClick={() => navigate('/chat')}
               className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white text-sm font-semibold rounded-xl transition-all border border-white/10 active:scale-95"
             >
               Ask AI
+              <ArrowRight size={15} />
+            </button>
+            <button
+              onClick={() => navigate('/voice')}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white text-sm font-semibold rounded-xl transition-all border border-white/10 active:scale-95"
+            >
+              Voice Mode
               <ArrowRight size={15} />
             </button>
           </div>
@@ -182,25 +191,30 @@ export function Dashboard() {
               {searchQuery ? `${filteredTeams.length} result${filteredTeams.length !== 1 ? 's' : ''} for "${searchQuery}"` : `${teams.length} active team${teams.length !== 1 ? 's' : ''}`}
             </p>
           </div>
-          <button
-            onClick={() => navigate('/content')}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
-          >
-            <Plus size={14} />
-            Add Team
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => navigate('/content')}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+            >
+              <Plus size={14} />
+              Add Team
+            </button>
+          )}
         </div>
 
         {filteredTeams.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 border-dashed">
             <Layers size={32} className="mx-auto text-slate-300 mb-3" />
             <p className="text-slate-500 font-medium">
-              {searchQuery ? `No teams match "${searchQuery}"` : 'No teams yet'}
+              {searchQuery ? `No teams match "${searchQuery}"` : 'No content yet'}
             </p>
-            {!searchQuery && (
+            {!searchQuery && isAdmin && (
               <button onClick={() => navigate('/content')} className="mt-3 text-red-600 text-sm font-semibold hover:underline">
                 Create your first team →
               </button>
+            )}
+            {!searchQuery && !isAdmin && (
+              <p className="mt-2 text-slate-400 text-sm">Content will appear here once the L&D team adds learning materials.</p>
             )}
           </div>
         ) : (

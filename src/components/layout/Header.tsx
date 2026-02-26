@@ -12,7 +12,7 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 export function Header() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { setSearchQuery } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,14 +73,16 @@ export function Header() {
           )}
         </div>
 
-        {/* Add content button */}
-        <button
-          onClick={() => navigate('/content')}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm shadow-red-200 active:scale-95"
-        >
-          <Plus size={15} />
-          Add Content
-        </button>
+        {/* Add content button — L&D admins only */}
+        {isAdmin && (
+          <button
+            onClick={() => navigate('/content')}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm shadow-red-200 active:scale-95"
+          >
+            <Plus size={15} />
+            Add Content
+          </button>
+        )}
 
         {/* Notifications */}
         <button className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all">

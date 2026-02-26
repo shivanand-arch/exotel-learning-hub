@@ -3,6 +3,18 @@ import type { Team, ContentModule, Slide } from '../types';
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 export const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 export const ALLOWED_DOMAIN = 'exotel.com';
+
+// Comma-separated list of L&D admin emails — set via VITE_ADMIN_EMAILS GitHub secret.
+// Admins can upload content, create teams, and access the Content Manager.
+// Everyone else on @exotel.com can view content only.
+export const ADMIN_EMAILS: string[] = (import.meta.env.VITE_ADMIN_EMAILS || '')
+  .split(',')
+  .map((e: string) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+export function isAdminEmail(email: string): boolean {
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+}
 export const APP_NAME = 'Exotel Hub';
 export const DB_NAME = 'exotel-hub-db';
 export const DB_VERSION = 1;

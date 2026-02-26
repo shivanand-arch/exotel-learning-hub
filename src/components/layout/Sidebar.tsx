@@ -6,17 +6,19 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useApp } from '../../contexts/AppContext';
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { to: '/content', label: 'Content Manager', icon: Upload },
-  { to: '/chat', label: 'AI Assistant', icon: MessageSquare },
-  { to: '/voice', label: 'Voice Mode', icon: Mic },
+const BASE_NAV_ITEMS = [
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true, adminOnly: false },
+  { to: '/content', label: 'Content Manager', icon: Upload, adminOnly: true },
+  { to: '/chat', label: 'AI Assistant', icon: MessageSquare, adminOnly: false },
+  { to: '/voice', label: 'Voice Mode', icon: Mic, adminOnly: false },
 ];
 
 export function Sidebar() {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const { teams, getModuleCount } = useApp();
   const location = useLocation();
+
+  const navItems = BASE_NAV_ITEMS.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <aside className="w-64 bg-slate-900 text-white flex flex-col h-screen fixed left-0 top-0 z-50 shadow-2xl">
@@ -33,7 +35,7 @@ export function Sidebar() {
 
       {/* Main navigation */}
       <nav className="px-3 pt-4 space-y-0.5">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => {
+        {navItems.map(({ to, label, icon: Icon, exact }) => {
           const isActive = exact ? location.pathname === to : location.pathname.startsWith(to);
           return (
             <NavLink
