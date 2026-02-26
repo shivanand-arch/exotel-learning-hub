@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, ArrowRight, BookOpen, Video, FileAudio, FileText, Link2, Presentation, Layers, Upload } from 'lucide-react';
+import { Plus, ArrowRight, BookOpen, Video, FileAudio, FileText, Link2, Presentation, Layers, Upload, Headphones } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { useAuth } from '../contexts/AuthContext';
 import type { Team, ContentModule } from '../types';
@@ -8,6 +8,7 @@ import { TEAM_COLORS } from '../config/constants';
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   video: <Video size={12} />,
   audio: <FileAudio size={12} />,
+  podcast: <Headphones size={12} />,
   pdf: <FileText size={12} />,
   document: <BookOpen size={12} />,
   slides: <Presentation size={12} />,

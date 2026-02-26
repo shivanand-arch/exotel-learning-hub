@@ -38,6 +38,7 @@ export const TEAM_COLORS = [
 export const MODULE_TYPE_META: Record<string, { label: string; icon: string; accept: string; color: string }> = {
   video: { label: 'Video', icon: '🎬', accept: 'video/*', color: 'text-red-600 bg-red-50' },
   audio: { label: 'Audio', icon: '🎵', accept: 'audio/*', color: 'text-orange-600 bg-orange-50' },
+  podcast: { label: 'Podcast', icon: '🎙️', accept: 'audio/*', color: 'text-purple-600 bg-purple-50' },
   pdf: { label: 'PDF', icon: '📄', accept: 'application/pdf', color: 'text-blue-600 bg-blue-50' },
   document: { label: 'Document', icon: '📝', accept: '.doc,.docx,.ppt,.pptx,.txt', color: 'text-emerald-600 bg-emerald-50' },
   slides: { label: 'Slides', icon: '🖼️', accept: '.pdf,.ppt,.pptx', color: 'text-violet-600 bg-violet-50' },

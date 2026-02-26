@@ -8,7 +8,7 @@ export interface User {
 }
 
 // ─── Teams & Modules ─────────────────────────────────────────────────────────
-export type ModuleType = 'video' | 'audio' | 'pdf' | 'document' | 'link' | 'slides';
+export type ModuleType = 'video' | 'audio' | 'podcast' | 'pdf' | 'document' | 'link' | 'slides';
 
 export interface Team {
   id: string;

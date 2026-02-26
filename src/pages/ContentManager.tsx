@@ -240,7 +240,7 @@ function ModuleForm({ file, teams, onSave, onCancel }: {
             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all" />
         </div>
 
-        {(form.type === 'video' || form.type === 'audio') && (
+        {(form.type === 'video' || form.type === 'audio' || form.type === 'podcast') && (
           <div>
             <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Duration (e.g. 02:30)</label>
             <input value={form.duration} onChange={e => update('duration', e.target.value)} placeholder="MM:SS"

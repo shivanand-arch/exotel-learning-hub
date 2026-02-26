@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Play, FileText, Mic2, Link2, BookOpen,
-  Presentation, Trash2, ExternalLink, Eye, Plus
+  Presentation, Trash2, ExternalLink, Eye, Plus, Headphones
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import type { ContentModule, ModuleType } from '../types';
@@ -10,17 +10,19 @@ import { TEAM_COLORS } from '../config/constants';
 import { getFileBlobTypedUrl } from '../db/indexedDB';
 import { VideoPlayerModal } from '../components/video/VideoPlayer';
 import { PDFViewerModal } from '../components/slides/PDFViewer';
+import { AudioPlayerModal } from '../components/audio/AudioPlayer';
 
 const TYPE_META: Record<ModuleType, { label: string; icon: React.ReactNode; color: string }> = {
   video: { label: 'Video', icon: <Play size={14} />, color: 'text-red-600 bg-red-50' },
   audio: { label: 'Audio', icon: <Mic2 size={14} />, color: 'text-orange-600 bg-orange-50' },
+  podcast: { label: 'Podcast', icon: <Headphones size={14} />, color: 'text-purple-600 bg-purple-50' },
   pdf: { label: 'PDF', icon: <FileText size={14} />, color: 'text-blue-600 bg-blue-50' },
   document: { label: 'Document', icon: <BookOpen size={14} />, color: 'text-emerald-600 bg-emerald-50' },
   slides: { label: 'Slides', icon: <Presentation size={14} />, color: 'text-violet-600 bg-violet-50' },
   link: { label: 'Link', icon: <Link2 size={14} />, color: 'text-teal-600 bg-teal-50' },
 };
 
-const ALL_TYPES: ModuleType[] = ['video', 'audio', 'pdf', 'document', 'slides', 'link'];
+const ALL_TYPES: ModuleType[] = ['video', 'audio', 'podcast', 'pdf', 'document', 'slides', 'link'];
 
 function ModuleItem({ module, onPlay, onView }: {
   module: ContentModule;
@@ -43,11 +45,13 @@ function ModuleItem({ module, onPlay, onView }: {
         )}
         {/* Play/View overlay */}
         <div
-          onClick={() => module.type === 'video' ? onPlay(module) : onView(module)}
+          onClick={() => (module.type === 'video' || module.type === 'audio' || module.type === 'podcast') ? onPlay(module) : onView(module)}
           className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center cursor-pointer"
         >
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all">
-            {module.type === 'video' ? <Play size={18} className="text-red-600 ml-0.5" /> : <Eye size={18} className="text-slate-700" />}
+            {(module.type === 'video' || module.type === 'audio' || module.type === 'podcast')
+              ? <Play size={18} className="text-red-600 ml-0.5" />
+              : <Eye size={18} className="text-slate-700" />}
           </div>
         </div>
         {/* Type badge */}
@@ -80,11 +84,11 @@ function ModuleItem({ module, onPlay, onView }: {
       {/* Actions */}
       <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
         <button
-          onClick={() => module.type === 'video' ? onPlay(module) : onView(module)}
+          onClick={() => (module.type === 'video' || module.type === 'audio' || module.type === 'podcast') ? onPlay(module) : onView(module)}
           className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-900 hover:bg-red-600 text-white text-xs font-semibold rounded-xl transition-all"
         >
-          {module.type === 'video' ? <Play size={12} /> : <Eye size={12} />}
-          {module.type === 'video' ? 'Play' : 'Open'}
+          {(module.type === 'video' || module.type === 'audio' || module.type === 'podcast') ? <Play size={12} /> : <Eye size={12} />}
+          {(module.type === 'video' || module.type === 'audio' || module.type === 'podcast') ? 'Play' : 'Open'}
         </button>
         {module.url && (
           <a
@@ -112,8 +116,9 @@ export function TeamDetail() {
   const navigate = useNavigate();
   const { teams, getTeamModules, removeTeam } = useApp();
   const [activeType, setActiveType] = useState<ModuleType | 'all'>('all');
-  const [playingModule, setPlayingModule] = useState<ContentModule | null>(null);
-  const [viewingModule, setViewingModule] = useState<ContentModule | null>(null);
+  const [playingModule, setPlayingModule] = useState<ContentModule | null>(null);  // video
+  const [audioModule, setAudioModule] = useState<ContentModule | null>(null);     // audio / podcast
+  const [viewingModule, setViewingModule] = useState<ContentModule | null>(null); // pdf / slides
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   const team = teams.find(t => t.id === teamId);
@@ -130,10 +135,19 @@ export function TeamDetail() {
   }, {});
 
   const handlePlay = async (module: ContentModule) => {
-    setPlayingModule(module);
-    if (module.fileName && !module.url) {
-      const url = await getFileBlobTypedUrl(module.id, module.fileType || 'video/mp4');
-      setBlobUrl(url);
+    // Route audio/podcast to audio player, video to video player
+    if (module.type === 'audio' || module.type === 'podcast') {
+      setAudioModule(module);
+      if (module.fileName && !module.url) {
+        const url = await getFileBlobTypedUrl(module.id, module.fileType || 'audio/mpeg');
+        setBlobUrl(url);
+      }
+    } else {
+      setPlayingModule(module);
+      if (module.fileName && !module.url) {
+        const url = await getFileBlobTypedUrl(module.id, module.fileType || 'video/mp4');
+        setBlobUrl(url);
+      }
     }
   };
 
@@ -250,6 +264,15 @@ export function TeamDetail() {
           module={playingModule}
           blobUrl={blobUrl}
           onClose={() => { setPlayingModule(null); setBlobUrl(null); }}
+        />
+      )}
+
+      {/* Audio / Podcast player modal */}
+      {audioModule && (
+        <AudioPlayerModal
+          module={audioModule}
+          blobUrl={blobUrl}
+          onClose={() => { setAudioModule(null); setBlobUrl(null); }}
         />
       )}
 
