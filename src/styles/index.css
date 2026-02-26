@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-300;
+  }
+
+  ::selection {
+    @apply bg-red-100 text-red-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-semibold px-5 py-2.5 rounded-xl border border-slate-200 transition-all duration-200 flex items-center gap-2;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-sm;
+  }
+
+  .card-hover {
+    @apply card hover:border-slate-300 hover:shadow-md transition-all duration-200 cursor-pointer;
+  }
+
+  .input-base {
+    @apply w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .section-title {
+    @apply text-2xl font-bold text-slate-900 tracking-tight;
+  }
+
+  .animate-in-up {
+    animation: slideUp 0.4s ease-out;
+  }
+}
+
+/* Chat markdown styling */
+.chat-markdown h1, .chat-markdown h2, .chat-markdown h3 {
+  @apply font-bold text-slate-900 mt-3 mb-1.5;
+}
+.chat-markdown h1 { @apply text-lg; }
+.chat-markdown h2 { @apply text-base; }
+.chat-markdown h3 { @apply text-sm; }
+.chat-markdown p { @apply mb-2 leading-relaxed; }
+.chat-markdown ul, .chat-markdown ol { @apply pl-4 mb-2 space-y-1; }
+.chat-markdown li { @apply text-sm; }
+.chat-markdown li::marker { @apply text-red-500; }
+.chat-markdown code { @apply bg-slate-100 text-red-600 px-1 py-0.5 rounded text-xs font-mono; }
+.chat-markdown pre { @apply bg-slate-900 text-emerald-400 p-4 rounded-xl text-xs overflow-x-auto mb-2; }
+.chat-markdown strong { @apply font-semibold text-slate-900; }
+.chat-markdown a { @apply text-red-600 underline; }

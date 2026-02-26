@@ -1,0 +1,90 @@
+# ─── Exotel Hub — GitHub Actions CI ──────────────────────────────────────────
+# Runs on every push: type-check → build → upload artifact
+# On push to main: also deploys to GitHub Pages (optional, see step comments)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: CI — Build & Validate
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  build:
+    name: Type-check & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Build production bundle
+        run: npm run build
+        env:
+          # Secrets are injected at build time so the SPA has them baked in.
+          # Add these in GitHub → Settings → Secrets → Actions → New secret
+          VITE_GEMINI_API_KEY:   ${{ secrets.VITE_GEMINI_API_KEY }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: exotel-hub-dist
+          path: dist/
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # OPTIONAL: Deploy to GitHub Pages on every push to main
+  # Enable in repo → Settings → Pages → Source: GitHub Actions
+  # ──────────────────────────────────────────────────────────────────────────
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: exotel-hub-dist
+          path: dist/
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
