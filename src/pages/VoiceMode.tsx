@@ -268,7 +268,7 @@ export function VoiceMode() {
             onClick={isActive ? stopSession : startSession}
             disabled={state === 'connecting'}
             className={`relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl focus:outline-none ${
-              state === 'active' || state === 'listening'
+              state === 'listening'
                 ? 'bg-red-600 hover:bg-red-700 shadow-red-900/50'
                 : state === 'speaking'
                 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/50'
